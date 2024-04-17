@@ -1,5 +1,5 @@
 use crate::components::GameMenu;
-use crate::state::{GameState, MenuState};
+use crate::state::{GameState, AppState};
 use crate::OnMainMenuScreen;
 use bevy::app::AppExit;
 use bevy::prelude::*;
@@ -11,16 +11,16 @@ impl Plugin for MenuStatePlugin {
         app.add_systems(
             Update,
             menu_system.run_if(
-                in_state(MenuState::MainMenu)
+                in_state(AppState::MainMenu)
                     .or_else(in_state(GameState::GameOver).or_else(in_state(GameState::Paused))),
             ),
         )
-        .add_systems(OnExit(MenuState::MainMenu), super::despawn_screen::<OnMainMenuScreen>)
+        .add_systems(OnExit(AppState::MainMenu), super::despawn_screen::<OnMainMenuScreen>)
         .add_systems(
             Update,
-            click_button.run_if(in_state(MenuState::MainMenu).or_else(in_state(GameState::Paused))),
+            click_button.run_if(in_state(AppState::MainMenu).or_else(in_state(GameState::Paused))),
         )
-        .add_systems(Update, pause_game.run_if(in_state(MenuState::Playing)));
+        .add_systems(Update, pause_game.run_if(in_state(AppState::Playing)));
     }
 }
 
@@ -128,7 +128,7 @@ fn menu_system(mut commands: Commands) {
 // 点击事件
 fn click_button(
     mut interaction_query: Query<(&Interaction, &GameMenu), (Changed<Interaction>, With<Button>)>,
-    mut app_state: ResMut<NextState<MenuState>>,
+    mut app_state: ResMut<NextState<AppState>>,
     mut game_state: ResMut<NextState<GameState>>,
     mut exit: EventWriter<AppExit>,
 ) {
@@ -137,7 +137,7 @@ fn click_button(
             Interaction::Pressed => match menu_button_action {
                 GameMenu::Start => {
                     info!("StartGame button clicked");
-                    app_state.set(MenuState::Playing);
+                    app_state.set(AppState::Playing);
                     game_state.set(GameState::InGame);
                 }
                 GameMenu::Quit => {

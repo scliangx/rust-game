@@ -12,15 +12,15 @@ use plugins::{
     AssetsPlugin, EnemyPlugin, InitGamePlugin, MenuStatePlugin, PlayerPlugin,DebugPlugin,
 };
 pub use resources::GameAssets;
-pub use state::{MenuState,GameState};
+pub use state::{AppState,GameState};
 
 
 fn main() {
     App::new()
         // 添加默认插件
         .add_plugins(DefaultPlugins)
+        .init_state::<AppState>()
         .init_state::<GameState>()
-        .init_state::<MenuState>()
         // 游戏初始化相关插件，背景颜色，窗口大小，标题
         .add_plugins(InitGamePlugin)
         .add_plugins(DebugPlugin)

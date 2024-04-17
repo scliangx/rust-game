@@ -1,5 +1,5 @@
 use crate::components::GameScore;
-use crate::state::{GameState, MenuState};
+use crate::state::{GameState, AppState};
 
 use bevy::prelude::*;
 
@@ -11,7 +11,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn score_system(mut commands: Commands, app_state: Res<State<MenuState>>, windows: Query<&Window>) {
+fn score_system(mut commands: Commands, app_state: Res<State<AppState>>, windows: Query<&Window>) {
     // 通过窗口大小和棋盘大小计算stats位置
     let window = windows.single();
     // gameboard左上角在窗口上的位置
@@ -19,7 +19,7 @@ fn score_system(mut commands: Commands, app_state: Res<State<MenuState>>, window
         window.width() / 2.0 - 120.0,
         window.height() / 2.0 - 20.0,
     );
-    if let MenuState::Playing = app_state.get() {
+    if let AppState::Playing = app_state.get() {
         commands
             .spawn((
                 NodeBundle {
