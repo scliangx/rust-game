@@ -194,7 +194,7 @@ fn move_player_bullt(
 
 fn enemy_laser_hit_player_system(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    // asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
     // 玩家子弹
     laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Player>, With<Bullt>)>,
