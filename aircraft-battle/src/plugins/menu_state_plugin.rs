@@ -1,6 +1,6 @@
 use crate::components::GameMenu;
-use crate::state::{GameState, AppState};
-use crate::OnMainMenuScreen;
+use crate::components::OnMainMenuScreen;
+use crate::state::{AppState, GameState};
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
@@ -15,7 +15,10 @@ impl Plugin for MenuStatePlugin {
                     .or_else(in_state(GameState::GameOver).or_else(in_state(GameState::Paused))),
             ),
         )
-        .add_systems(OnExit(AppState::MainMenu), super::despawn_screen::<OnMainMenuScreen>)
+        .add_systems(
+            OnExit(AppState::MainMenu),
+            super::despawn_screen::<OnMainMenuScreen>,
+        )
         .add_systems(
             Update,
             click_button.run_if(in_state(AppState::MainMenu).or_else(in_state(GameState::Paused))),
@@ -26,16 +29,19 @@ impl Plugin for MenuStatePlugin {
 
 fn menu_system(mut commands: Commands) {
     commands
-        .spawn((NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },OnMainMenuScreen))
+            OnMainMenuScreen,
+        ))
         .with_children(|parent| {
             parent
                 .spawn(NodeBundle {
@@ -166,4 +172,3 @@ fn pause_game(
         }
     }
 }
-

@@ -1,12 +1,10 @@
 mod menu_state_plugin;
-mod assets_plugin;
 mod player_plugin;
 mod enemy_plugin;
 mod init_plugin;
 mod debug_plugin;
 
 pub use menu_state_plugin::MenuStatePlugin;
-pub use assets_plugin::AssetsPlugin;
 pub use player_plugin::PlayerPlugin;
 pub use enemy_plugin::EnemyPlugin;
 pub use init_plugin::InitGamePlugin;
