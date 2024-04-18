@@ -1,8 +1,5 @@
 use crate::components::{Airship, Bullt, Enemy, GameScore, Player, SpriteSize};
-use crate::constant::{
-    LASER_HELGHT_SIZE, LASER_WIDTH_SIZE, MISSILE_FORWARD_SPAWN_SCALAR, SPACESHIP_HEIGHT,
-    SPACESHIP_WIDTH,
-};
+use crate::constant::*;
 use crate::state::AppState;
 
 use crate::Score;
@@ -24,6 +21,7 @@ impl Plugin for PlayerPlugin {
                     spawn_player_bullt,
                     move_player_bullt,
                     enemy_laser_hit_player_system,
+                    player_laser_despawn
                 )
                     .run_if(in_state(AppState::Playing)),
             );
@@ -88,17 +86,17 @@ fn spawn_player(
     asset_server: Res<AssetServer>,
 ) {
     let window = window_query.single();
-    let y = -window.height() / 2.0 + SPACESHIP_HEIGHT / 2.0;
+    let bottom = -window.height() / 2.;
     let x = 0.0;
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_xyz(x, y, 0.0),
+            transform: Transform::from_xyz(x, bottom + PLAYER_SIZE.1 / 2., 0.0),
             texture: asset_server.load("player.png"),
             ..default()
         },
         Player,
         Airship,
-        SpriteSize::from((SPACESHIP_HEIGHT, SPACESHIP_WIDTH)),
+        SpriteSize::from(PLAYER_SIZE),
     ));
 }
 
@@ -136,8 +134,8 @@ fn confine_move_player(
 ) {
     let mut trandform = query.single_mut();
     let window = window_query.single();
-    let half_player_heigt = SPACESHIP_HEIGHT / 2.0;
-    let half_player_width = SPACESHIP_WIDTH / 2.0;
+    let half_player_width = PLAYER_SIZE.0 / 2.0;
+    let half_player_heigt = PLAYER_SIZE.1 / 2.0;
     let x_min = -window.width() / 2.0 + half_player_width;
     let x_max = window.width() / 2.0 - half_player_width;
     let y_min = -window.height() / 2.0 + half_player_heigt;
@@ -146,7 +144,7 @@ fn confine_move_player(
     if trandform.translation.x > x_max {
         trandform.translation.x = x_max;
     } else if trandform.translation.x < x_min {
-        trandform.translation.x = x_min
+        trandform.translation.x = x_min;
     }
 
     if trandform.translation.y > y_max {
@@ -178,48 +176,59 @@ fn spawn_player_bullt(
             },
             Player,
             Bullt,
-            SpriteSize::from((LASER_HELGHT_SIZE, LASER_WIDTH_SIZE)),
+            SpriteSize::from(PLAYER_LASER_SIZE),
         ));
     }
 }
 
 fn move_player_bullt(
-    mut query: Query<&mut Transform, (With<Bullt>, With<Player>)>,
+    mut query: Query<(&mut Transform, &mut SpriteSize), (With<Bullt>, With<Player>)>,
     time: Res<Time>,
 ) {
-    for mut transform in query.iter_mut() {
+    for (mut transform, mut sprite_szie) in query.iter_mut() {
         transform.translation.y += 500.0 * time.delta_seconds();
+        sprite_szie.0.y = transform.translation.y;
     }
 }
 
 fn enemy_laser_hit_player_system(
     mut commands: Commands,
-    // asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
+    // window: Query<&Window, With<PrimaryWindow>>,
     // 玩家子弹
-    laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Player>, With<Bullt>)>,
+    laser_query: Query<(Entity, &Transform), (With<Player>, With<Bullt>)>,
     // 敌人
     enemy_query: Query<(Entity, &Transform, &SpriteSize), With<Enemy>>,
 ) {
-    for (laser_entity, laser_tf, laser_size) in laser_query.iter() {
+    for (laser_entity, laser_tf) in laser_query.iter() {
         for (enemy_entity, enemy_tf, enemy_size) in enemy_query.iter() {
             // 不相同的两个entity之间的距离
-            let distance = laser_tf.translation.distance(enemy_tf.translation);
-            if distance < (laser_size.0.y / 2.0 + enemy_size.0.y / 2.0) {
+            let distance = laser_tf.translation.xy().distance(enemy_tf.translation.xy());
+            
+            if distance < (enemy_size.0.x *0.5 * enemy_size.0.x*0.5 + enemy_size.0.y*0.5 * enemy_size.0.y*0.5).sqrt() {
                 commands.entity(laser_entity).despawn();
                 commands.entity(enemy_entity).despawn();
-                // commands
-                //     .spawn(SpriteSheetBundle {
-                //         texture: asset_server.load("explo.png"),
-                //         transform: Transform {
-                //             translation: enemy_tf.translation,
-                //             ..Default::default()
-                //         },
-                //         ..Default::default()
-                //     })
-                //     .despawn();
                 score.0 += 10;
             }
+            // if laser_size.0.y > y {
+            //     commands.entity(laser_entity).despawn();
+            // }
+        }
+    }
+}
+
+
+fn player_laser_despawn(
+    mut commands: Commands,
+    window: Query<&Window, With<PrimaryWindow>>,
+    // 玩家子弹
+    laser_query: Query<(Entity, &Transform), (With<Player>, With<Bullt>)>,
+) {
+    let window = window.single();
+    let top = window.height() / 2.0;
+    for (enity,tf) in laser_query.iter() {
+        if tf.translation.y > top {
+            commands.entity(enity).despawn();
         }
     }
 }

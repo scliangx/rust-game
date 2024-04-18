@@ -1,9 +1,12 @@
+use bevy::math::bounding::BoundingCircle;
 use bevy::{prelude::*, window::PrimaryWindow};
-use crate::components::SpriteSize;
+use crate::components::{SpriteSize,Bullt};
 use crate::{components::Enemy, resources::SpawnTimer};
-use rand::{self, Rng};
 use crate::state::GameState;
 use crate::EnemyCount;
+use crate::constant::*;
+
+use rand::{self, Rng};
 
 
 pub struct EnemyPlugin;
@@ -39,12 +42,27 @@ fn spawn_enemy(mut commands: Commands,
     let (xx,yy) = (rng.gen_range(-x..x) as f32,rng.gen_range(-y/2.0..y)as f32);
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_xyz(xx,yy  , 0.0),
             texture: asset_server.load("enemy.png"),
+            transform:  Transform{
+                translation: Vec3::new(xx,yy  , 0.0),
+                scale: Vec3::new(SPRITE_SCALE, SPRITE_SCALE, 1.),
+                ..default()
+            },
             ..default()
         },
         Enemy,
-        SpriteSize::from((xx,yy))
+        Bullt,
+        SpriteSize::from((ENEMY_SIZE.0 * 0.5,ENEMY_SIZE.1 * 0.5))
     ));
     enemy_count.0 += 1;
+}
+
+
+#[allow(dead_code)]
+fn enemy_laser(mut commands: Commands,query: Query<(&Transform,&SpriteSize),(With<Enemy>,With<SpriteSize>)>) {
+    for (_tf,_sp) in query.iter() {
+        commands.spawn(SpriteBundle{
+            ..default()
+        });
+    }
 }
