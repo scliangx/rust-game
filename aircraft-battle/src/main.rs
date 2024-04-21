@@ -20,7 +20,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .init_state::<AppState>()
         .init_state::<GameState>()
-        .insert_resource(EnemyCount::new(5))
         // 初始化相关资源
         // .init_resource::<GameAssets>()
         // 游戏初始化相关插件，背景颜色，窗口大小，标题

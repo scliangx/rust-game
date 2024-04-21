@@ -1,4 +1,5 @@
 
+
 use bevy::prelude::*;
 
 
@@ -47,3 +48,24 @@ impl From<(f32, f32)> for SpriteSize {
 		SpriteSize(Vec2::new(val.0, val.1))
 	}
 }
+
+
+#[derive(Component,Debug)]
+pub struct  Direction {
+	pub left: bool,
+	pub right: bool,
+	pub top:bool,
+	pub down: bool,
+}
+
+impl Default for Direction{
+	fn default() -> Self {
+		Self {
+			left: false,
+			right: true,
+			top: true,
+			down: false,
+		}
+	}
+}
+

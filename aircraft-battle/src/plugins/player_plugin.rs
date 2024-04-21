@@ -11,7 +11,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Score>()
-            .add_systems(Startup, spawn_player)
+            .add_systems(OnEnter(AppState::Playing), spawn_player)
             .add_systems(
                 Update,
                 (
